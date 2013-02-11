@@ -69,12 +69,12 @@ namespace fileFunctions
 		std::string                     getFirstLine            () const
 		{
 			// If the file has a first line, returns it. Otherwise returns a blank string.
-			return fileContents.size() != 0 ? fileContents.at(0) : "";
+			return fileContents.size() ? fileContents.at(0) : "";
 		}
 		std::string                     getLastLine             () const
 		{
 			// If the file has a last line, returns it. Otherwise returns a blank string.
-			return fileContents.size() != 0 ? fileContents.at(fileContents.size() - 1) : "";
+			return fileContents.size() ? fileContents.at(fileContents.size() - 1) : "";
 		}
 		std::string                     getLine                 (std::size_t index) const
 		{
@@ -143,6 +143,7 @@ namespace fileFunctions
 		}
 		void setLine         (std::size_t index, const std::string & str)
 		{
+			// Sets line[index] to 'str'
 			if (index < fileContents.size())
 			{
 				fileContents.at(index) = str;
@@ -150,10 +151,12 @@ namespace fileFunctions
 		}
 		void appendLine      (const std::string & str)
 		{
+			// Places a line at the end of the file
 			fileContents.push_back(str);
 		}
 		void prependLine     (const std::string & str)
 		{
+			// Inserts a line at the beginning of the file
 			fileContents.push_front(str);
 		}
 		void insertLine      (std::size_t index, const std::string & str)
@@ -166,6 +169,7 @@ namespace fileFunctions
 		}
 		void removeLine      (std::size_t index)
 		{
+			// Removes a line from the file
 			if (index < fileContents.size())
 			{
 				fileContents.erase(fileContents.begin() + index);
@@ -173,6 +177,7 @@ namespace fileFunctions
 		}
 		void removeLineIf    (std::size_t index, const std::function<bool (const std::string &)> & function)
 		{
+			// Removes a line if function(line) == true
 			if (index < fileContents.size() && function(fileContents.at(index)))
 			{
 				fileContents.erase(fileContents.begin() + index);
@@ -180,6 +185,7 @@ namespace fileFunctions
 		}
 		void removeLines     (std::size_t lowerBound, std::size_t upperBound)
 		{
+			// Removes the lines in [lowerBound, upperBound]
 			if (std::min(lowerBound, upperBound) < fileContents.size())
 			{
 				fileContents.erase(fileContents.begin() + std::min(lowerBound, upperBound), fileContents.begin() + 1 + std::min(std::max(lowerBound, upperBound), fileContents.size() - 1));
@@ -187,6 +193,7 @@ namespace fileFunctions
 		}
 		void removeLinesIf   (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (const std::string &)> & function)
 		{
+			// Goes through each line in [lowerBound, upperBound] and erases it if function(line) == true
 			if (lowerBound < fileContents.size() || upperBound < fileContents.size())
 			{
 				if (lowerBound > upperBound)
@@ -209,10 +216,12 @@ namespace fileFunctions
 		}
 		void clearContents   ()
 		{
+			// Erases every line in the file
 			fileContents.erase(fileContents.begin(), fileContents.end());
 		}
 		void clearContentsIf (const std::function<bool (const std::string &)> & function)
 		{
+			// Goes through each line in the file and erases it if function(line) == true
 			std::size_t begin = 0;
 			std::size_t end = fileContents.size();
 			while (begin != end)
@@ -303,7 +312,7 @@ namespace fileFunctions
 			// Clears the contents of the file specified by FileWrapper::fileName, then outputs
 			// the data held by the FileWrapper object to the file specified by FileWrapper::fileName
 			std::fstream file(fileName, std::ios::out);
-			for (auto & i : fileContents)
+			for (auto i : fileContents)
 			{
 				if (file.is_open())
 				{
@@ -317,7 +326,7 @@ namespace fileFunctions
 			// the data held by the FileWrapper object to the file specified by
 			// 'filePath'
 			std::fstream file(filePath, std::ios::out);
-			for (auto & i : fileContents)
+			for (auto i : fileContents)
 			{
 				if (file.is_open())
 				{
@@ -330,7 +339,7 @@ namespace fileFunctions
 			// Appends the contents of the FileWrapper object to
 			// the file specified by FileWrapper::fileName
 			std::fstream file(fileName, std::ios::out | std::ios::app);
-			for (auto & i : fileContents)
+			for (auto i : fileContents)
 			{
 				if (file.is_open())
 				{
@@ -343,7 +352,7 @@ namespace fileFunctions
 			// Appends the contents of the FileWrapper object to the file specified
 			// by 'filePath'. Does not affect the file held by FileWrapper::fileName
 			std::fstream file(filePath, std::ios::out | std::ios::app);
-			for (auto & i : fileContents)
+			for (auto i : fileContents)
 			{
 				if (file.is_open())
 				{
