@@ -68,18 +68,22 @@ namespace fileFunctions
 		// Accessors
 		std::string                     getFirstLine            () const
 		{
+			// If the file has a first line, returns it. Otherwise returns a blank string.
 			return fileContents.size() != 0 ? fileContents.at(0) : "";
 		}
 		std::string                     getLastLine             () const
 		{
+			// If the file has a last line, returns it. Otherwise returns a blank string.
 			return fileContents.size() != 0 ? fileContents.at(fileContents.size() - 1) : "";
 		}
 		std::string                     getLine                 (std::size_t index) const
 		{
+			// Returns a line in the file if it exists. Otherwise returns a blank string.
 			return index < fileContents.size() ? fileContents.at(index) : ""; 
 		}
 		std::deque<std::string>         getLines                (std::size_t lowerBound, std::size_t upperBound) const
 		{
+			// Returns a series of lines in the file if they exist. Otherwise returns an empty deque.
 			if (lowerBound < fileContents.size() || upperBound < fileContents.size())
 			{
 				return std::deque<std::string>(fileContents.cbegin() + std::min(lowerBound, upperBound), fileContents.cbegin() + 1 + std::min(std::max(lowerBound, upperBound), fileContents.size() - 1));
@@ -88,18 +92,22 @@ namespace fileFunctions
 		}
 		const std::deque<std::string> & getFileContents         () const
 		{
+			// Returns the contents of the file as a deque.
 			return fileContents;
 		}
 		std::string                     getFileName             () const
 		{
+			// Returns the name of the file associated with the FileWrapper object
 			return fileName;
 		}
 		FileCloseAction                 getClosingAction        () const
 		{
+			// Returns the action that will occur upon destruction
 			return closingAction;
 		}
 		std::string                     getClosingActionAsString() const
 		{
+			// Returns the action that will occur upon destruction as a string
 			switch (closingAction)
 			{
 			case NONE:
@@ -234,7 +242,7 @@ namespace fileFunctions
 		void        loadFromFile           ()
 		{
 			// Clears the contents of the FileWrapper object, then loads in the
-			// data from the file specified by FileWrapper:fileName
+			// data from the file specified by FileWrapper::fileName
 			std::fstream file(fileName, std::ios::in);
 			clearContents();
 			if (file.is_open())
@@ -263,7 +271,7 @@ namespace fileFunctions
 		}
 		void        loadFromFileAndAppend  ()
 		{
-			// Loads the data from the file specified by FileWrapper:fileName, then
+			// Loads the data from the file specified by FileWrapper::fileName, then
 			// appends it to the data currently held by the FileWrapper object
 			std::fstream file(fileName, std::ios::in);
 			if (file.is_open())
