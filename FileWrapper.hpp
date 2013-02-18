@@ -6,7 +6,6 @@
 #include <deque>
 #include <string>
 #include <algorithm>
-#include <cstdlib>
 #include <functional>
 #include <iostream>
 
@@ -183,6 +182,15 @@ namespace fileFunctions
 				fileContents.erase(fileContents.begin() + index);
 			}
 		}
+		template <class T>
+		void removeLineIf    (std::size_t index, const std::function<bool (const std::string &, const T &)> & function, const T & parameter)
+		{
+			// Removes a line if function(line, parameter) == true
+			if (index < fileContents.size() && function(fileContents.at(index), parameter))
+			{
+				fileContents.erase(fileContents.begin() + index);
+			}
+		}
 		void removeLines     (std::size_t lowerBound, std::size_t upperBound)
 		{
 			// Removes the lines in [lowerBound, upperBound]
@@ -214,6 +222,30 @@ namespace fileFunctions
 				}
 			}
 		}
+		template <class T>
+		void removeLinesIf   (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (const std::string &, const T &)> & function, const T & parameter)
+		{
+			// Goes through each line in [lowerBound, upperBound] and erases it if function(line, parameter) == true
+			if (lowerBound < fileContents.size() || upperBound < fileContents.size())
+			{
+				if (lowerBound > upperBound)
+				{
+					std::swap(lowerBound, upperBound);
+				}
+				while (lowerBound <= upperBound && lowerBound < fileContents.size())
+				{
+					if (function(fileContents.at(lowerBound), parameter))
+					{
+						fileContents.erase(fileContents.begin() + lowerBound);
+						--upperBound;
+					}
+					else
+					{
+						++lowerBound;
+					}
+				}
+			}
+		}
 		void clearContents   ()
 		{
 			// Erases every line in the file
@@ -227,6 +259,25 @@ namespace fileFunctions
 			while (begin != end)
 			{
 				if (function(fileContents.at(begin)))
+				{
+					fileContents.erase(fileContents.begin() + begin);
+					--end;
+				}
+				else
+				{
+					++begin;
+				}
+			}
+		}
+		template <class T>
+		void clearContentsIf (const std::function<bool (const std::string &, const T &)> & function, const T & parameter)
+		{
+			// Goes through each line in the file and erases it if function(line, parameter) == true
+			std::size_t begin = 0;
+			std::size_t end = fileContents.size();
+			while (begin != end)
+			{
+				if (function(fileContents.at(begin), parameter))
 				{
 					fileContents.erase(fileContents.begin() + begin);
 					--end;
@@ -406,6 +457,15 @@ namespace fileFunctions
 				fileContents.at(index) = function(fileContents.at(index), parameterOne, parameterTwo, parameterThree);
 			}
 		}
+		template <class T, class U, class V, class W>
+		void        applyFunctionToLine    (std::size_t index, const std::function<std::string (const std::string &, const T &, const U &, const V &, const W &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree, const W & parameterFour)
+		{
+			// Apply a function that takes a single string and four other parameters as arguments to a single line in the file
+			if (index < fileContents.size())
+			{
+				fileContents.at(index) = function(fileContents.at(index), parameterOne, parameterTwo, parameterThree, parameterFour);
+			}
+		}
 		void        applyFunctionToLines   (std::size_t lowerBound, std::size_t upperBound, const std::function<std::string (const std::string &)> & function)
 		{
 			// Apply a function that takes a single string as an argument to a series of lines in the file
@@ -441,6 +501,15 @@ namespace fileFunctions
 				fileContents.at(i) = function(fileContents.at(i), parameterOne, parameterTwo, parameterThree);
 			}
 		}
+		template <class T, class U, class V, class W>
+		void        applyFunctionToLines   (std::size_t lowerBound, std::size_t upperBound, const std::function<std::string (const std::string &, const T &, const U &, const V &, const W &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree, const W & parameterFour)
+		{
+			// Apply a function that takes a single string and four other parameters as arguments to a series of lines in the file
+			for (unsigned int i = std::min(lowerBound, upperBound); i <= std::max(lowerBound, upperBound) && i < fileContents.size(); ++i)
+			{
+				fileContents.at(i) = function(fileContents.at(i), parameterOne, parameterTwo, parameterThree, parameterFour);
+			}
+		}
 		void        applyFunctionToContents(const std::function<std::string (const std::string &)> & function)
 		{
 			// Apply a function that takes a single string as an argument to each line in the file
@@ -474,6 +543,15 @@ namespace fileFunctions
 			for (auto & i : fileContents)
 			{
 				i = function(i, parameterOne, parameterTwo, parameterThree);
+			}
+		}
+		template <class T, class U, class V, class W>
+		void        applyFunctionToContents(const std::function<std::string (const std::string &, const T &, const U &, const V &, const W &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree, const W & parameterFour)
+		{
+			// Apply a function that takes a single string and four other parameters as arguments to each line in the file
+			for (auto & i : fileContents)
+			{
+				i = function(i, parameterOne, parameterTwo, parameterThree, parameterFour);
 			}
 		}
 		// Iterators
