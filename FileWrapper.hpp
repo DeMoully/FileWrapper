@@ -11,6 +11,11 @@
 
 namespace fileFunctions
 {
+	typedef std::deque<std::string>::iterator               FileIterator;
+	typedef std::deque<std::string>::const_iterator         ConstFileIterator;
+	typedef std::deque<std::string>::reverse_iterator       ReverseFileIterator;
+	typedef std::deque<std::string>::const_reverse_iterator ConstReverseFileIterator;
+
 	enum FileCloseAction
 	{
 		NONE, // Perform no actions upon deletion of object
@@ -22,8 +27,8 @@ namespace fileFunctions
 	{
 	private:
 		std::deque<std::string> fileContents;
-		std::string fileName;
-		FileCloseAction closingAction;
+		std::string             fileName;
+		FileCloseAction         closingAction;
 	public:
 		// Constructors
 		FileWrapper         () : closingAction(NONE)
@@ -38,6 +43,22 @@ namespace fileFunctions
 		{
 			// Opens and loads a file into memory
 			loadFromFile(filePath);
+		}
+		FileWrapper         (FileIterator first, FileIterator last) : fileContents(first, last)
+		{
+			// Creates a new FileWrapper object from two valid non-const iterators
+		}
+		FileWrapper         (ConstFileIterator first, ConstFileIterator last) : fileContents(first, last)
+		{
+			// Creates a new FileWrapper object from two valid const iterators
+		}
+		FileWrapper         (ReverseFileIterator first, ReverseFileIterator last) : fileContents(first, last)
+		{
+			// Creates a new FileWrapper object from two valid non-const reverse iterators
+		}
+		FileWrapper         (ConstReverseFileIterator first, ConstReverseFileIterator last) : fileContents(first, last)
+		{
+			// Creates a new FileWrapper object from two valid const reverse iterators
 		}
 		FileWrapper         (const FileWrapper & rhs) : fileContents(rhs.fileContents), fileName(rhs.fileName), closingAction(rhs.closingAction)
 		{
@@ -191,6 +212,15 @@ namespace fileFunctions
 				fileContents.erase(fileContents.begin() + index);
 			}
 		}
+		template <class T, class U>
+		void removeLineIf    (std::size_t index, const std::function<bool (const std::string &, const T &, const U &)> & function, const T & parameterOne, const U & parameterTwo)
+		{
+			// Removes a line if function(line, parameterOne, parameterTwo) == true
+			if (index < fileContents.size() && function(fileContents.at(index), parameterOne, parameterTwo))
+			{
+				fileContents.erase(fileContents.begin() + index);
+			}
+		}
 		void removeLines     (std::size_t lowerBound, std::size_t upperBound)
 		{
 			// Removes the lines in [lowerBound, upperBound]
@@ -246,6 +276,30 @@ namespace fileFunctions
 				}
 			}
 		}
+		template <class T, class U>
+		void removeLinesIf   (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (const std::string &, const T &, const U &)> & function, const T & parameterOne, const U & parameterTwo)
+		{
+			// Goes through each line in [lowerBound, upperBound] and erases it if function(line, parameterOne, parameterTwo) == true
+			if (lowerBound < fileContents.size() || upperBound < fileContents.size())
+			{
+				if (lowerBound > upperBound)
+				{
+					std::swap(lowerBound, upperBound);
+				}
+				while (lowerBound <= upperBound && lowerBound < fileContents.size())
+				{
+					if (function(fileContents.at(lowerBound), parameterOne, parameterTwo))
+					{
+						fileContents.erase(fileContents.begin() + lowerBound);
+						--upperBound;
+					}
+					else
+					{
+						++lowerBound;
+					}
+				}
+			}
+		}
 		void clearContents   ()
 		{
 			// Erases every line in the file
@@ -278,6 +332,25 @@ namespace fileFunctions
 			while (begin != end)
 			{
 				if (function(fileContents.at(begin), parameter))
+				{
+					fileContents.erase(fileContents.begin() + begin);
+					--end;
+				}
+				else
+				{
+					++begin;
+				}
+			}
+		}
+		template <class T, class U>
+		void clearContentsIf (const std::function<bool (const std::string &, const T &, const U &)> & function, const T & parameterOne, const U & parameterTwo)
+		{
+			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo) == true
+			std::size_t begin = 0;
+			std::size_t end = fileContents.size();
+			while (begin != end)
+			{
+				if (function(fileContents.at(begin), parameterOne, parameterTwo))
 				{
 					fileContents.erase(fileContents.begin() + begin);
 					--end;
@@ -555,35 +628,35 @@ namespace fileFunctions
 			}
 		}
 		// Iterators
-		std::deque<std::string>::iterator                     begin  ()
+		FileIterator             begin  ()
 		{
 			return fileContents.begin();
 		}
-		std::deque<std::string>::iterator                     end    ()
+		FileIterator             end    ()
 		{
 			return fileContents.end();
 		}
-		const std::deque<std::string>::const_iterator         cbegin () const
+		ConstFileIterator        cbegin () const
 		{
 			return fileContents.cbegin();
 		}
-		const std::deque<std::string>::const_iterator         cend   () const
+		ConstFileIterator        cend   () const
 		{
 			return fileContents.cend();
 		}
-		std::deque<std::string>::reverse_iterator             rbegin ()
+		ReverseFileIterator      rbegin ()
 		{
 			return fileContents.rbegin();
 		}
-		std::deque<std::string>::reverse_iterator             rend   ()
+		ReverseFileIterator      rend   ()
 		{
 			return fileContents.rend();
 		}
-		const std::deque<std::string>::const_reverse_iterator crbegin() const
+		ConstReverseFileIterator crbegin() const
 		{
 			return fileContents.crbegin();
 		}
-		const std::deque<std::string>::const_reverse_iterator crend  () const
+		ConstReverseFileIterator crend  () const
 		{
 			return fileContents.crend();
 		}
@@ -611,13 +684,13 @@ namespace fileFunctions
 		}
 		bool                operator != (const FileWrapper & rhs) const
 		{
-			// Returns true if any of the components are not equal, otherwise returns true
+			// Returns true if any of the components are not equal, otherwise returns false
 			return fileContents != rhs.getFileContents() || fileName != rhs.getFileName() || closingAction != rhs.getClosingAction();
 		}
 		const std::string & operator [] (std::size_t index) const
 		{
 			// Doesn't perform any bounds checking, leaves that to the deque
-			return fileContents[index]; 
+			return fileContents.at(index); 
 		}
 		std::string &       operator [] (std::size_t index)
 		{
