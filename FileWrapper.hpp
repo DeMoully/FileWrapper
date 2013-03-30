@@ -9,19 +9,14 @@
 #include <functional>
 #include <iostream>
 
+#include "FileCloseAction.hpp"
+
 namespace fileFunctions
 {
 	typedef std::deque<std::string>::iterator               FileIterator;
 	typedef std::deque<std::string>::const_iterator         ConstFileIterator;
 	typedef std::deque<std::string>::reverse_iterator       ReverseFileIterator;
 	typedef std::deque<std::string>::const_reverse_iterator ConstReverseFileIterator;
-
-	enum FileCloseAction
-	{
-		NONE, // Perform no actions upon deletion of object
-		OUTPUT, // Output the current contents of the object to the file specified by fileName
-		APPEND // Append the current contents of the object to the file specified by fileName
-	};
 
 	class FileWrapper
 	{
@@ -44,19 +39,19 @@ namespace fileFunctions
 			// Opens and loads a file into memory
 			loadFromFile(filePath);
 		}
-		FileWrapper         (FileIterator first, FileIterator last) : fileContents(first, last)
+		FileWrapper         (FileIterator first, FileIterator last) : fileContents(first, last), closingAction(NONE)
 		{
 			// Creates a new FileWrapper object from two valid non-const iterators
 		}
-		FileWrapper         (ConstFileIterator first, ConstFileIterator last) : fileContents(first, last)
+		FileWrapper         (ConstFileIterator first, ConstFileIterator last) : fileContents(first, last), closingAction(NONE)
 		{
 			// Creates a new FileWrapper object from two valid const iterators
 		}
-		FileWrapper         (ReverseFileIterator first, ReverseFileIterator last) : fileContents(first, last)
+		FileWrapper         (ReverseFileIterator first, ReverseFileIterator last) : fileContents(first, last), closingAction(NONE)
 		{
 			// Creates a new FileWrapper object from two valid non-const reverse iterators
 		}
-		FileWrapper         (ConstReverseFileIterator first, ConstReverseFileIterator last) : fileContents(first, last)
+		FileWrapper         (ConstReverseFileIterator first, ConstReverseFileIterator last) : fileContents(first, last), closingAction(NONE)
 		{
 			// Creates a new FileWrapper object from two valid const reverse iterators
 		}
@@ -351,6 +346,44 @@ namespace fileFunctions
 			while (begin != end)
 			{
 				if (function(fileContents.at(begin), parameterOne, parameterTwo))
+				{
+					fileContents.erase(fileContents.begin() + begin);
+					--end;
+				}
+				else
+				{
+					++begin;
+				}
+			}
+		}
+		template <class T, class U, class V>
+		void clearContentsIf (const std::function<bool (const std::string &, const T &, const U &, const V &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree)
+		{
+			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo) == true
+			std::size_t begin = 0;
+			std::size_t end = fileContents.size();
+			while (begin != end)
+			{
+				if (function(fileContents.at(begin), parameterOne, parameterTwo, parameterThree))
+				{
+					fileContents.erase(fileContents.begin() + begin);
+					--end;
+				}
+				else
+				{
+					++begin;
+				}
+			}
+		}
+		template <class T, class U, class V, class W>
+		void clearContentsIf (const std::function<bool (const std::string &, const T &, const U &, const V &, const W &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree, const W & parameterFour)
+		{
+			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo) == true
+			std::size_t begin = 0;
+			std::size_t end = fileContents.size();
+			while (begin != end)
+			{
+				if (function(fileContents.at(begin), parameterOne, parameterTwo, parameterThree, parameterFour))
 				{
 					fileContents.erase(fileContents.begin() + begin);
 					--end;
