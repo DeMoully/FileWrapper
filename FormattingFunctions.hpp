@@ -135,4 +135,4 @@ namespace fileFunctions
 	{
 		return str.size() == length;
 	}
-};
+}

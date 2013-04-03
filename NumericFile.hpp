@@ -32,7 +32,7 @@ namespace fileFunctions
 		FileCloseAction closingAction;
 	public:
 		// Constructors
-		NumericFile         () : closingAction(NONE)
+		NumericFile         () : closingAction(FileCloseAction::NONE)
 		{
 			// Create an empty NumericFile object
 		}
@@ -40,24 +40,24 @@ namespace fileFunctions
 		{
 			// Create a NumericFile object that is not associated with any files and does not load any data upon creation
 		}
-		explicit NumericFile(const std::string filePath, FileCloseAction onClose = NONE) : fileName(filePath), closingAction(onClose)
+		explicit NumericFile(const std::string filePath, FileCloseAction onClose = FileCloseAction::NONE) : fileName(filePath), closingAction(onClose)
 		{
 			// Creates a NumericFile object that is associated with a file and loads data upon creation
 			loadFromFile(filePath);
 		}
-		NumericFile         (NumericFileIterator first, NumericFileIterator last) : contents(first, last), closingAction(NONE)
+		NumericFile         (NumericFileIterator first, NumericFileIterator last) : contents(first, last), closingAction(FileCloseAction::NONE)
 		{
 			// Creates a NumericFile from an iterator range
 		}
-		NumericFile         (ConstNumericFileIterator first, ConstNumericFileIterator last) : contents(first, last), closingAction(NONE)
+		NumericFile         (ConstNumericFileIterator first, ConstNumericFileIterator last) : contents(first, last), closingAction(FileCloseAction::NONE)
 		{
 			// Creates a NumericFile from an iterator range
 		}
-		NumericFile         (ReverseNumericFileIterator first, ReverseNumericFileIterator last) : contents(first, last), closingAction(NONE)
+		NumericFile         (ReverseNumericFileIterator first, ReverseNumericFileIterator last) : contents(first, last), closingAction(FileCloseAction::NONE)
 		{
 			// Creates a NumericFile from an iterator range
 		}
-		NumericFile         (ConstReverseNumericFileIterator first, ConstReverseNumericFileIterator last) : contents(first, last), closingAction(NONE)
+		NumericFile         (ConstReverseNumericFileIterator first, ConstReverseNumericFileIterator last) : contents(first, last), closingAction(FileCloseAction::NONE)
 		{
 			// Creates a NumericFile from an iterator range
 		}
@@ -74,12 +74,12 @@ namespace fileFunctions
 		{
 			switch (closingAction)
 			{
-			case OUTPUT: // Output the contents to 'fileName'
+			case FileCloseAction::OUTPUT: // Output the contents to 'fileName'
 				{
 					outputToFile();
 					break;
 				}
-			case APPEND: // Append the contents to 'fileName'
+			case FileCloseAction::APPEND: // Append the contents to 'fileName'
 				{
 					appendToFile();
 					break;
@@ -111,15 +111,15 @@ namespace fileFunctions
 		{
 			switch (closingAction)
 			{
-			case NONE:
+			case FileCloseAction::NONE:
 				{
 					return "NONE";
 				}
-			case OUTPUT:
+			case FileCloseAction::OUTPUT:
 				{
 					return "OUTPUT";
 				}
-			case APPEND:
+			case FileCloseAction::APPEND:
 				{
 					return "APPEND";
 				}
@@ -231,7 +231,7 @@ namespace fileFunctions
 		{
 			std::fstream file(fileName, std::ios::in);
 			clearContents();
-			contents.push_back(std::deque<double>());
+			contents.push_back(NumericLine());
 			if (file.is_open())
 			{
 				double buffer;
@@ -240,7 +240,7 @@ namespace fileFunctions
 					contents.at(contents.size() - 1).push_back(buffer);
 					if (file.peek() == '\n')
 					{
-						contents.push_back(std::deque<double>());
+						contents.push_back(NumericLine());
 					}
 				}
 			}
@@ -249,7 +249,7 @@ namespace fileFunctions
 		{
 			std::fstream file(str, std::ios::in);
 			clearContents();
-			contents.push_back(std::deque<double>());
+			contents.push_back(NumericLine());
 			if (file.is_open())
 			{
 				double buffer;
@@ -258,7 +258,7 @@ namespace fileFunctions
 					contents.at(contents.size() - 1).push_back(buffer);
 					if (file.peek() == '\n')
 					{
-						contents.push_back(std::deque<double>());
+						contents.push_back(NumericLine());
 					}
 				}
 			}
@@ -266,7 +266,7 @@ namespace fileFunctions
 		void        loadFromFileAndAppend  ()
 		{
 			std::fstream file(fileName, std::ios::in);
-			contents.push_back(std::deque<double>());
+			contents.push_back(NumericLine());
 			if (file.is_open())
 			{
 				double buffer;
@@ -275,7 +275,7 @@ namespace fileFunctions
 					contents.at(contents.size() - 1).push_back(buffer);
 					if (file.peek() == '\n')
 					{
-						contents.push_back(std::deque<double>());
+						contents.push_back(NumericLine());
 					}
 				}
 			}
@@ -283,7 +283,7 @@ namespace fileFunctions
 		void        loadFromFileAndAppend  (const std::string & filePath)
 		{
 			std::fstream file(filePath, std::ios::in);
-			contents.push_back(std::deque<double>());
+			contents.push_back(NumericLine());
 			if (file.is_open())
 			{
 				double buffer;
@@ -292,7 +292,7 @@ namespace fileFunctions
 					contents.at(contents.size() - 1).push_back(buffer);
 					if (file.peek() == '\n')
 					{
-						contents.push_back(std::deque<double>());
+						contents.push_back(NumericLine());
 					}
 				}
 			}
