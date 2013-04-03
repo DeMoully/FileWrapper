@@ -26,7 +26,7 @@ namespace fileFunctions
 		FileCloseAction         closingAction;
 	public:
 		// Constructors
-		FileWrapper         () : closingAction(NONE)
+		FileWrapper         () : closingAction(FileCloseAction::NONE)
 		{
 			// Creates an empty FileWrapper object
 		}
@@ -34,24 +34,24 @@ namespace fileFunctions
 		{
 			// Creates an empty FileWrapper object
 		}
-		explicit FileWrapper(const std::string & filePath, FileCloseAction onClose = NONE) : fileName(filePath), closingAction(onClose)
+		explicit FileWrapper(const std::string & filePath, FileCloseAction onClose = FileCloseAction::NONE) : fileName(filePath), closingAction(onClose)
 		{
 			// Opens and loads a file into memory
 			loadFromFile(filePath);
 		}
-		FileWrapper         (FileIterator first, FileIterator last) : fileContents(first, last), closingAction(NONE)
+		FileWrapper         (FileIterator first, FileIterator last) : fileContents(first, last), closingAction(FileCloseAction::NONE)
 		{
 			// Creates a new FileWrapper object from two valid non-const iterators
 		}
-		FileWrapper         (ConstFileIterator first, ConstFileIterator last) : fileContents(first, last), closingAction(NONE)
+		FileWrapper         (ConstFileIterator first, ConstFileIterator last) : fileContents(first, last), closingAction(FileCloseAction::NONE)
 		{
 			// Creates a new FileWrapper object from two valid const iterators
 		}
-		FileWrapper         (ReverseFileIterator first, ReverseFileIterator last) : fileContents(first, last), closingAction(NONE)
+		FileWrapper         (ReverseFileIterator first, ReverseFileIterator last) : fileContents(first, last), closingAction(FileCloseAction::NONE)
 		{
 			// Creates a new FileWrapper object from two valid non-const reverse iterators
 		}
-		FileWrapper         (ConstReverseFileIterator first, ConstReverseFileIterator last) : fileContents(first, last), closingAction(NONE)
+		FileWrapper         (ConstReverseFileIterator first, ConstReverseFileIterator last) : fileContents(first, last), closingAction(FileCloseAction::NONE)
 		{
 			// Creates a new FileWrapper object from two valid const reverse iterators
 		}
@@ -68,12 +68,12 @@ namespace fileFunctions
 		{
 			switch (closingAction)
 			{
-			case OUTPUT:
+			case FileCloseAction::OUTPUT:
 				{
 					outputToFile();
 					break;
 				}
-			case APPEND:
+			case FileCloseAction::APPEND:
 				{
 					appendToFile();
 					break;
@@ -125,15 +125,15 @@ namespace fileFunctions
 			// Returns the action that will occur upon destruction as a string
 			switch (closingAction)
 			{
-			case NONE:
+			case FileCloseAction::NONE:
 				{
 					return "NONE";
 				}
-			case OUTPUT:
+			case FileCloseAction::OUTPUT:
 				{
 					return "OUTPUT";
 				}
-			case APPEND:
+			case FileCloseAction::APPEND:
 				{
 					return "APPEND";
 				}
@@ -731,4 +731,4 @@ namespace fileFunctions
 			return fileContents.at(index);
 		}
 	};
-};
+}
