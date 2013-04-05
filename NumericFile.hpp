@@ -7,8 +7,10 @@
 #include <algorithm>
 #include <functional>
 #include <string>
+#include <numeric>
 
 #include "FileCloseAction.hpp"
+#include "CommonFunctions.hpp"
 
 namespace fileFunctions
 {
@@ -72,6 +74,7 @@ namespace fileFunctions
 		// Destructor
 		~NumericFile()
 		{
+			// Perform an action based on the value of closingAction
 			switch (closingAction)
 			{
 			case FileCloseAction::OUTPUT: // Output the contents to 'fileName'
@@ -89,26 +92,32 @@ namespace fileFunctions
 		// Accessors
 		double                                 getEntry                (std::size_t line, std::size_t index) const
 		{
-			return (line < contents.size() && index < contents.at(line).size()) ? contents.at(line).at(index) : 0;
+			// Returns the entry at (line, index) if the entry exists, otherwise returns 0
+			return (line < size() && index < lineSize(line)) ? contents.at(line).at(index) : 0;
 		}
 		NumericLine                            getLine                 (std::size_t line) const
 		{
-			return (line < contents.size()) ? contents.at(line) : NumericLine();
+			// Returns the line at (line) if it exists, otherwise returns an empty NumericLine
+			return (line < size()) ? contents.at(line) : NumericLine();
 		}
 		const std::deque<NumericLine> &        getFileContents         () const
 		{
+			// Returns the content of the file as a deque of NumericLines
 			return contents;
 		}
 		std::string                            getFileName             () const
 		{
+			// Returns the fileName associated with the NumericFile
 			return fileName;
 		}
 		FileCloseAction                        getClosingAction        () const
 		{
+			// Returns the closing action
 			return closingAction;
 		}
 		std::string                            getClosingActionAsString() const
 		{
+			// Returns the closing action as a string
 			switch (closingAction)
 			{
 			case FileCloseAction::NONE:
@@ -132,102 +141,117 @@ namespace fileFunctions
 		// Mutators
 		void setFileName       (const std::string & filePath)
 		{
+			// Sets fileName to filePath
 			fileName = filePath;
 		}
 		void setClosingAction  (FileCloseAction onClose)
 		{
+			// Changes the closing action to onClose
 			closingAction = onClose;
 		}
 		void setEntry          (std::size_t line, std::size_t index, double value)
 		{
-			if (line < contents.size() && index < contents.at(line).size())
+			// Sets the entry located at (line, index) to value
+			if (line < size() && index < lineSize(line))
 			{
 				contents.at(line).at(index) = value;
 			}
 		}
 		void appendEntryToLine (std::size_t line, double value)
 		{
-			if (line < contents.size())
+			// Appends an entry to the line at (line) if it exists
+			if (line < size())
 			{
 				contents.at(line).push_back(value);
 			}
 		}
 		void prependEntryToLine(std::size_t line, double value)
 		{
-			if (line < contents.size())
+			// Prepends an entry to the line at (line) if it exists
+			if (line < size())
 			{
 				contents.at(line).push_front(value);
 			}
 		}
 		void insertEntryInLine (std::size_t line, std::size_t index, double value)
 		{
-			if (line < contents.size() && index < contents.at(line).size())
+			// Inserts an entry at (line, index) if possible
+			if (line < size() && index < lineSize(line))
 			{
 				contents.at(line).insert(contents.at(line).begin() + index, value);
 			}
 		}
 		void appendLineToFile  (NumericLineIterator first, NumericLineIterator last)
 		{
+			// Appends a line to the file
 			contents.emplace_back(first, last);
 		}
 		void prependLineToFile (NumericLineIterator first, NumericLineIterator last)
 		{
+			// Prepends a line to the file
 			contents.emplace_front(first, last);
 		}
 		void insertLineInFile  (std::size_t line, NumericLineIterator first, NumericLineIterator last)
 		{
-			if (line < contents.size())
+			// Inserts a line into the file if possible
+			if (line < size())
 			{
 				contents.emplace(contents.begin() + line, first, last);
 			}
 		}
 		void appendLineToFile  (const NumericLine & line)
 		{
+			// Appends a line to the file
 			contents.push_back(line);
 		}
 		void prependLineToFile (const NumericLine & line)
 		{
+			// Prepends a line to the file
 			contents.push_front(line);
 		}
 		void insertLineInFile  (std::size_t line, const NumericLine & numericLine)
 		{
-			if (line < contents.size())
+			// Inserts a line into the file if possible
+			if (line < size())
 			{
 				contents.insert(contents.begin() + line, numericLine);
 			}
 		}
 		void removeEntry       (std::size_t line, std::size_t index)
 		{
-			if (line < contents.size() && index < contents.at(line).size())
+			// Removes an entry from the file if it exists
+			if (line < size() && index < lineSize(line))
 			{
 				contents.at(line).erase(contents.at(line).begin() + index);
 			}
 		}
 		void removeLine        (std::size_t line)
 		{
-			if (line < contents.size())
+			// Removes a line from the file
+			if (line < size())
 			{
 				contents.erase(contents.begin() + line);
 			}
 		}
 		void clearContents     ()
 		{
+			// Clears the contents of the file
 			contents.erase(contents.begin(), contents.end());
 		}
 		// Utilities
-		bool        empty                  () const
+		bool        empty                        () const
 		{
 			return contents.empty();
 		}
-		std::size_t size                   () const
+		std::size_t size                         () const
 		{
 			return contents.size();
 		}
-		std::size_t lineSize               (std::size_t index) const
+		std::size_t lineSize                     (std::size_t index) const
 		{
-			return (index < contents.size() ? contents.at(index).size() : 0);
+			return (index < size() ? contents.at(index).size() : 0);
 		}
-		void        loadFromFile           ()
+		void        loadFromFile                 ()
 		{
 			std::fstream file(fileName, std::ios::in);
 			clearContents();
@@ -237,7 +261,7 @@ namespace fileFunctions
 				double buffer;
 				while (file >> buffer)
 				{
-					contents.at(contents.size() - 1).push_back(buffer);
+					contents.at(size() - 1).push_back(buffer);
 					if (file.peek() == '\n')
 					{
 						contents.push_back(NumericLine());
@@ -245,7 +269,7 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        loadFromFile           (const std::string & str)
+		void        loadFromFile                 (const std::string & str)
 		{
 			std::fstream file(str, std::ios::in);
 			clearContents();
@@ -255,7 +279,7 @@ namespace fileFunctions
 				double buffer;
 				while (file >> buffer)
 				{
-					contents.at(contents.size() - 1).push_back(buffer);
+					contents.at(size() - 1).push_back(buffer);
 					if (file.peek() == '\n')
 					{
 						contents.push_back(NumericLine());
@@ -263,7 +287,7 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        loadFromFileAndAppend  ()
+		void        loadFromFileAndAppend        ()
 		{
 			std::fstream file(fileName, std::ios::in);
 			contents.push_back(NumericLine());
@@ -272,7 +296,7 @@ namespace fileFunctions
 				double buffer;
 				while (file >> buffer)
 				{
-					contents.at(contents.size() - 1).push_back(buffer);
+					contents.at(size() - 1).push_back(buffer);
 					if (file.peek() == '\n')
 					{
 						contents.push_back(NumericLine());
@@ -280,7 +304,7 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        loadFromFileAndAppend  (const std::string & filePath)
+		void        loadFromFileAndAppend        (const std::string & filePath)
 		{
 			std::fstream file(filePath, std::ios::in);
 			contents.push_back(NumericLine());
@@ -289,7 +313,7 @@ namespace fileFunctions
 				double buffer;
 				while (file >> buffer)
 				{
-					contents.at(contents.size() - 1).push_back(buffer);
+					contents.at(size() - 1).push_back(buffer);
 					if (file.peek() == '\n')
 					{
 						contents.push_back(NumericLine());
@@ -297,21 +321,24 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        outputToStream         (std::ostream & ostr) const
+		void        outputToStream               (std::ostream & ostr) const
 		{
-			for (auto & i : contents)
+			for (NumericLine i : contents)
 			{
 				for (double j : i)
 				{
-					ostr << j << " ";
+					if (ostr.good())
+					{
+						ostr << j << " ";
+					}
 				}
 				ostr << std::endl;
 			}
 		}
-		void        outputToFile           () const
+		void        outputToFile                 () const
 		{
 			std::fstream file(fileName, std::ios::out);
-			for (const auto & i : contents)
+			for (NumericLine i : contents)
 			{
 				for (double j : i)
 				{
@@ -326,10 +353,10 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        outputToFile           (const std::string & filePath) const
+		void        outputToFile                 (const std::string & filePath) const
 		{
 			std::fstream file(filePath, std::ios::out);
-			for (const auto & i : contents)
+			for (NumericLine i : contents)
 			{
 				for (double j : i)
 				{
@@ -344,10 +371,10 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        appendToFile           () const
+		void        appendToFile                 () const
 		{
 			std::fstream file(fileName, std::ios::out | std::ios::app);
-			for (auto & i : contents)
+			for (NumericLine i : contents)
 			{
 				for (double j : i)
 				{
@@ -362,10 +389,10 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        appendToFile           (const std::string & filePath) const
+		void        appendToFile                 (const std::string & filePath) const
 		{
 			std::fstream file(filePath, std::ios::out | std::ios::app);
-			for (auto & i : contents)
+			for (NumericLine i : contents)
 			{
 				for (double j : i)
 				{
@@ -380,16 +407,50 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        applyFunctionToEntry   (std::size_t line, std::size_t index, const std::function<double (double)> & function)
+		void        applyFunctionToEntry         (std::size_t line, std::size_t index, const std::function<double (double)> & function)
 		{
-			if (line < contents.size() && index < contents.at(line).size())
+			if (line < size() && index < lineSize(line))
 			{
 				contents.at(line).at(index) = function(contents.at(line).at(index));
 			}
 		}
-		void        applyFunctionToLine    (std::size_t line, const std::function<double (double)> & function)
+		void        applyFunctionToEntries       (std::size_t line, std::size_t lowerBound, std::size_t upperBound, const std::function<double (double)> & function)
 		{
-			if (line < contents.size())
+			if (line < size())
+			{
+				FWPF::validateBounds(lowerBound, upperBound);
+				for (unsigned int i = lowerBound; i <= upperBound && i < lineSize(line); ++i)
+				{
+					contents.at(line).at(i) = function(contents.at(line).at(i));
+				}
+			}
+		}
+		void        applyFunctionToEntryInLines  (std::size_t entry, std::size_t lowerBound, std::size_t upperBound, const std::function<double (double)> & function)
+		{
+			FWPF::validateBounds(lowerBound, upperBound);
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
+			{
+				if (entry < lineSize(i))
+				{
+					contents.at(i).at(entry) = function(contents.at(i).at(entry));
+				}
+			}
+		}
+		void        applyFunctionToEntriesInLines(std::size_t lowerEntry, std::size_t upperEntry, std::size_t lowerBound, std::size_t upperBound, const std::function<double (double)> & function)
+		{
+			FWPF::validateBounds(lowerEntry, upperEntry);
+			FWPF::validateBounds(lowerBound, upperBound);
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
+			{
+				for (unsigned int j = lowerEntry; j < upperEntry && j < lineSize(i); ++j)
+				{
+					contents.at(i).at(j) = function(contents.at(i).at(j));
+				}
+			}
+		}
+		void        applyFunctionToLine          (std::size_t line, const std::function<double (double)> & function)
+		{
+			if (line < size())
 			{
 				for (double & i : contents.at(line))
 				{
@@ -397,9 +458,20 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        applyFunctionToContents(const std::function<double (double)> & function)
+		void        applyFunctionToLines         (std::size_t lowerBound, std::size_t upperBound, const std::function<double (double)> & function)
 		{
-			for (auto & i : contents)
+			FWPF::validateBounds(lowerBound, upperBound);
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
+			{
+				for (double & j : contents.at(i))
+				{
+					j = function(j);
+				}
+			}
+		}
+		void        applyFunctionToContents      (const std::function<double (double)> & function)
+		{
+			for (NumericLine & i : contents)
 			{
 				for (double & j : i)
 				{
@@ -407,27 +479,24 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        sortLine               (std::size_t line, const std::function<bool (double, double)> & predicate = std::less<double>())
+		void        sortLine                     (std::size_t line, const std::function<bool (double, double)> & predicate = std::less<double>())
 		{
-			if (line < contents.size())
+			if (line < size())
 			{
 				std::sort(contents.at(line).begin(), contents.at(line).end(), predicate);
 			}
 		}
-		void        sortLines              (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (double, double)> & predicate = std::less<double>())
+		void        sortLines                    (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (double, double)> & predicate = std::less<double>())
 		{
-			if (upperBound < lowerBound)
-			{
-				std::swap(upperBound, lowerBound);
-			}
-			for (unsigned int i = lowerBound; i < contents.size() && i <= upperBound; ++i)
+			FWPF::validateBounds(lowerBound, upperBound);
+			for (unsigned int i = lowerBound; i < size() && i <= upperBound; ++i)
 			{
 				std::sort(contents.at(i).begin(), contents.at(i).end(), predicate);
 			}
 		}
-		void        sortContents           (const std::function<bool (double, double)> & predicate = std::less<double>())
+		void        sortContents                 (const std::function<bool (double, double)> & predicate = std::less<double>())
 		{
-			for (auto & i : contents)
+			for (NumericLine & i : contents)
 			{
 				std::sort(i.begin(), i.end(), predicate);
 			}
@@ -435,11 +504,103 @@ namespace fileFunctions
 		// Computational Utilities
 		double computeValueFromLine                     (std::size_t line, const std::function<double (const std::deque<double> &)> & function)
 		{
-			return line < contents.size() ? function(contents.at(line)) : 0;
+			return line < size() ? function(contents.at(line)) : 0;
 		}
 		double computeValueFromLineUsingIteratorFunction(std::size_t line, const std::function<double (NumericLineIterator, NumericLineIterator)> & function)
 		{
-			return line < contents.size() ? function(contents.at(line).begin(), contents.at(line).end()) : 0;
+			return line < size() ? function(contents.at(line).begin(), contents.at(line).end()) : 0;
+		}
+		double computeSumOfLine                         (std::size_t line) const
+		{
+			return line < size() ? std::accumulate(contents.at(line).begin(), contents.at(line).end(), 0.0) : 0;
+		}
+		double computeSumOfLines                        (std::size_t lowerBound, std::size_t upperBound) const
+		{
+			FWPF::validateBounds(lowerBound, upperBound);
+			double sum = 0;
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
+			{
+				sum += std::accumulate(contents.at(i).begin(), contents.at(i).end(), 0.0);
+			}
+			return sum;
+		}
+		double computeSumOfContents                     () const
+		{
+			double sum = 0;
+			for (NumericLine i : contents)
+			{
+				sum += std::accumulate(i.begin(), i.end(), 0.0);
+			}
+			return sum;
+		}
+		double computeAverageOfLine                     (std::size_t line) const
+		{
+			return lineSize(line) ? std::accumulate(contents.at(line).begin(), contents.at(line).end(), 0.0) / lineSize(line) : 0;
+		}
+		double computeAverageOfLines                    (std::size_t lowerBound, std::size_t upperBound) const
+		{
+			FWPF::validateBounds(lowerBound, upperBound);
+			double sum = 0;
+			std::size_t numElems = 0;
+			for (unsigned int i = lowerBound; i <= upperBound; ++i)
+			{
+				sum += std::accumulate(contents.at(i).begin(), contents.at(i).end(), 0.0);
+				numElems += lineSize(i);
+			}
+			return numElems ? sum / numElems : 0;
+		}
+		double computeAverageOfContents                 () const
+		{
+			double sum = 0;
+			std::size_t numElems = 0;
+			for (unsigned int i = 0; i < size(); ++i)
+			{
+				sum += std::accumulate(contents.at(i).begin(), contents.at(i).end(), 0.0);
+				numElems += lineSize(i);
+			}
+			return numElems ? sum / numElems : 0;
+		}
+		double computeVarianceOfLine                    (std::size_t line) const
+		{
+			if (line < size())
+			{
+				if (lineSize(line))
+				{
+					double mean = computeAverageOfLine(line);
+					double sumOfSquares = 0;
+					for (double i : contents.at(line))
+					{
+						sumOfSquares += (i - mean) * (i - mean);
+					}
+					return sumOfSquares / lineSize(line);
+				}
+				return 0;
+			}
+			return 0;
+		}
+		double computeVarianceOfLines                   (std::size_t lowerBound, std::size_t upperBound) const
+		{
+			FWPF::validateBounds(lowerBound, upperBound);
+			double mean = computeAverageOfLines(lowerBound, upperBound);
+			double sumOfSquares = 0;
+			std::size_t numElems = 0;
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
+			{
+				for (unsigned int j = 0; j < lineSize(i); ++j)
+				{
+					sumOfSquares += (contents.at(i).at(j) - mean) * (contents.at(i).at(j) - mean);
+					++numElems;
+				}
+			}
+			return numElems ? sumOfSquares / numElems : 0;
+		}
+		double computeStandardDeviationOfLine           (std::size_t line) const
+		{
+			return std::sqrt(computeVarianceOfLine(line));
+		}
+		double computeStandardDeviationOfLines          (std::size_t lowerBound, std::size_t upperBound) const
+		{
+			return std::sqrt(computeVarianceOfLines(lowerBound, upperBound));
 		}
 		// Iterators
 		NumericFileIterator             begin  ()

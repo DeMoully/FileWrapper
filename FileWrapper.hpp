@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "FileCloseAction.hpp"
+#include "CommonFunctions.hpp"
 
 namespace fileFunctions
 {
@@ -84,24 +85,25 @@ namespace fileFunctions
 		std::string                     getFirstLine            () const
 		{
 			// If the file has a first line, returns it. Otherwise returns a blank string.
-			return fileContents.size() ? fileContents.at(0) : "";
+			return size() ? fileContents.at(0) : "";
 		}
 		std::string                     getLastLine             () const
 		{
 			// If the file has a last line, returns it. Otherwise returns a blank string.
-			return fileContents.size() ? fileContents.at(fileContents.size() - 1) : "";
+			return size() ? fileContents.at(size() - 1) : "";
 		}
 		std::string                     getLine                 (std::size_t index) const
 		{
 			// Returns a line in the file if it exists. Otherwise returns a blank string.
-			return index < fileContents.size() ? fileContents.at(index) : ""; 
+			return index < size() ? fileContents.at(index) : ""; 
 		}
 		std::deque<std::string>         getLines                (std::size_t lowerBound, std::size_t upperBound) const
 		{
 			// Returns a series of lines in the file if they exist. Otherwise returns an empty deque.
-			if (lowerBound < fileContents.size() || upperBound < fileContents.size())
+			FWPF::validateBounds(lowerBound, upperBound);
+			if (lowerBound < size())
 			{
-				return std::deque<std::string>(fileContents.cbegin() + std::min(lowerBound, upperBound), fileContents.cbegin() + 1 + std::min(std::max(lowerBound, upperBound), fileContents.size() - 1));
+				return std::deque<std::string>(fileContents.begin() + lowerBound, fileContents.begin() + 1 + std::min(upperBound, size() - 1));
 			}
 			return std::deque<std::string>();
 		}
@@ -159,7 +161,7 @@ namespace fileFunctions
 		void setLine         (std::size_t index, const std::string & str)
 		{
 			// Sets line[index] to 'str'
-			if (index < fileContents.size())
+			if (index < size())
 			{
 				fileContents.at(index) = str;
 			}
@@ -177,7 +179,7 @@ namespace fileFunctions
 		void insertLine      (std::size_t index, const std::string & str)
 		{
 			// Inserts a line before the given index
-			if (index < fileContents.size())
+			if (index < size())
 			{
 				fileContents.insert(fileContents.begin() + index, str);
 			}
@@ -185,7 +187,7 @@ namespace fileFunctions
 		void removeLine      (std::size_t index)
 		{
 			// Removes a line from the file
-			if (index < fileContents.size())
+			if (index < size())
 			{
 				fileContents.erase(fileContents.begin() + index);
 			}
@@ -193,7 +195,7 @@ namespace fileFunctions
 		void removeLineIf    (std::size_t index, const std::function<bool (const std::string &)> & function)
 		{
 			// Removes a line if function(line) == true
-			if (index < fileContents.size() && function(fileContents.at(index)))
+			if (index < size() && function(fileContents.at(index)))
 			{
 				fileContents.erase(fileContents.begin() + index);
 			}
@@ -202,7 +204,7 @@ namespace fileFunctions
 		void removeLineIf    (std::size_t index, const std::function<bool (const std::string &, const T &)> & function, const T & parameter)
 		{
 			// Removes a line if function(line, parameter) == true
-			if (index < fileContents.size() && function(fileContents.at(index), parameter))
+			if (index < size() && function(fileContents.at(index), parameter))
 			{
 				fileContents.erase(fileContents.begin() + index);
 			}
@@ -211,7 +213,7 @@ namespace fileFunctions
 		void removeLineIf    (std::size_t index, const std::function<bool (const std::string &, const T &, const U &)> & function, const T & parameterOne, const U & parameterTwo)
 		{
 			// Removes a line if function(line, parameterOne, parameterTwo) == true
-			if (index < fileContents.size() && function(fileContents.at(index), parameterOne, parameterTwo))
+			if (index < size() && function(fileContents.at(index), parameterOne, parameterTwo))
 			{
 				fileContents.erase(fileContents.begin() + index);
 			}
@@ -219,21 +221,19 @@ namespace fileFunctions
 		void removeLines     (std::size_t lowerBound, std::size_t upperBound)
 		{
 			// Removes the lines in [lowerBound, upperBound]
-			if (std::min(lowerBound, upperBound) < fileContents.size())
+			FWPF::validateBounds(lowerBound, upperBound);
+			if (lowerBound < size())
 			{
-				fileContents.erase(fileContents.begin() + std::min(lowerBound, upperBound), fileContents.begin() + 1 + std::min(std::max(lowerBound, upperBound), fileContents.size() - 1));
+				fileContents.erase(fileContents.begin() + lowerBound, fileContents.begin() + 1 + std::min(upperBound, size() - 1));
 			}
 		}
 		void removeLinesIf   (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (const std::string &)> & function)
 		{
 			// Goes through each line in [lowerBound, upperBound] and erases it if function(line) == true
-			if (lowerBound < fileContents.size() || upperBound < fileContents.size())
+			FWPF::validateBounds(lowerBound, upperBound);
+			if (lowerBound < size())
 			{
-				if (lowerBound > upperBound)
-				{
-					std::swap(lowerBound, upperBound);
-				}
-				while (lowerBound <= upperBound && lowerBound < fileContents.size())
+				while (lowerBound <= upperBound && lowerBound < size())
 				{
 					if (function(fileContents.at(lowerBound)))
 					{
@@ -251,13 +251,10 @@ namespace fileFunctions
 		void removeLinesIf   (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (const std::string &, const T &)> & function, const T & parameter)
 		{
 			// Goes through each line in [lowerBound, upperBound] and erases it if function(line, parameter) == true
-			if (lowerBound < fileContents.size() || upperBound < fileContents.size())
+			FWPF::validateBounds(lowerBound, upperBound);
+			if (lowerBound < size())
 			{
-				if (lowerBound > upperBound)
-				{
-					std::swap(lowerBound, upperBound);
-				}
-				while (lowerBound <= upperBound && lowerBound < fileContents.size())
+				while (lowerBound <= upperBound && lowerBound < size())
 				{
 					if (function(fileContents.at(lowerBound), parameter))
 					{
@@ -275,13 +272,10 @@ namespace fileFunctions
 		void removeLinesIf   (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (const std::string &, const T &, const U &)> & function, const T & parameterOne, const U & parameterTwo)
 		{
 			// Goes through each line in [lowerBound, upperBound] and erases it if function(line, parameterOne, parameterTwo) == true
-			if (lowerBound < fileContents.size() || upperBound < fileContents.size())
+			FWPF::validateBounds(lowerBound, upperBound);
+			if (lowerBound < size())
 			{
-				if (lowerBound > upperBound)
-				{
-					std::swap(lowerBound, upperBound);
-				}
-				while (lowerBound <= upperBound && lowerBound < fileContents.size())
+				while (lowerBound <= upperBound && lowerBound < size())
 				{
 					if (function(fileContents.at(lowerBound), parameterOne, parameterTwo))
 					{
@@ -304,7 +298,7 @@ namespace fileFunctions
 		{
 			// Goes through each line in the file and erases it if function(line) == true
 			std::size_t begin = 0;
-			std::size_t end = fileContents.size();
+			std::size_t end = size();
 			while (begin != end)
 			{
 				if (function(fileContents.at(begin)))
@@ -323,7 +317,7 @@ namespace fileFunctions
 		{
 			// Goes through each line in the file and erases it if function(line, parameter) == true
 			std::size_t begin = 0;
-			std::size_t end = fileContents.size();
+			std::size_t end = size();
 			while (begin != end)
 			{
 				if (function(fileContents.at(begin), parameter))
@@ -342,7 +336,7 @@ namespace fileFunctions
 		{
 			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo) == true
 			std::size_t begin = 0;
-			std::size_t end = fileContents.size();
+			std::size_t end = size();
 			while (begin != end)
 			{
 				if (function(fileContents.at(begin), parameterOne, parameterTwo))
@@ -361,7 +355,7 @@ namespace fileFunctions
 		{
 			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo) == true
 			std::size_t begin = 0;
-			std::size_t end = fileContents.size();
+			std::size_t end = size();
 			while (begin != end)
 			{
 				if (function(fileContents.at(begin), parameterOne, parameterTwo, parameterThree))
@@ -380,7 +374,7 @@ namespace fileFunctions
 		{
 			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo) == true
 			std::size_t begin = 0;
-			std::size_t end = fileContents.size();
+			std::size_t end = size();
 			while (begin != end)
 			{
 				if (function(fileContents.at(begin), parameterOne, parameterTwo, parameterThree, parameterFour))
@@ -404,6 +398,11 @@ namespace fileFunctions
 		{
 			// Returns the number of lines held by the FileWrapper object
 			return fileContents.size();
+		}
+		std::size_t lineSize               (std::size_t index) const
+		{
+			// Returns the size of a line in the file if the line exists, otherwise returns 0
+			return index < size() ? fileContents.at(index).size() : 0;
 		}
 		void        loadFromFile           ()
 		{
@@ -531,7 +530,7 @@ namespace fileFunctions
 		void        applyFunctionToLine    (std::size_t index, const std::function<std::string (const std::string &)> & function)
 		{
 			// Apply a function that takes a single string as an argument to a single line in the file
-			if (index < fileContents.size())
+			if (index < size())
 			{
 				fileContents.at(index) = function(fileContents.at(index));
 			}
@@ -540,7 +539,7 @@ namespace fileFunctions
 		void        applyFunctionToLine    (std::size_t index, const std::function<std::string (const std::string &, const T &)> & function, const T & parameter)
 		{
 			// Apply a function that takes a single string and another parameter as arguments to a single line in the file
-			if (index < fileContents.size())
+			if (index < size())
 			{
 				fileContents.at(index) = function(fileContents.at(index), parameter);
 			}
@@ -549,7 +548,7 @@ namespace fileFunctions
 		void        applyFunctionToLine    (std::size_t index, const std::function<std::string (const std::string &, const T &, const U &)> & function, const T & parameterOne, const U & parameterTwo)
 		{
 			// Apply a function that takes a single string and two other parameters as arguments to a single line of the file
-			if (index < fileContents.size())
+			if (index < size())
 			{
 				fileContents.at(index) = function(fileContents.at(index), parameterOne, parameterTwo);
 			}
@@ -558,7 +557,7 @@ namespace fileFunctions
 		void        applyFunctionToLine    (std::size_t index, const std::function<std::string (const std::string &, const T &, const U &, const V &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree)
 		{
 			// Apply a function that takes a single string and three other parameters as arguments to a single line in the file
-			if (index < fileContents.size())
+			if (index < size())
 			{
 				fileContents.at(index) = function(fileContents.at(index), parameterOne, parameterTwo, parameterThree);
 			}
@@ -567,7 +566,7 @@ namespace fileFunctions
 		void        applyFunctionToLine    (std::size_t index, const std::function<std::string (const std::string &, const T &, const U &, const V &, const W &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree, const W & parameterFour)
 		{
 			// Apply a function that takes a single string and four other parameters as arguments to a single line in the file
-			if (index < fileContents.size())
+			if (index < size())
 			{
 				fileContents.at(index) = function(fileContents.at(index), parameterOne, parameterTwo, parameterThree, parameterFour);
 			}
@@ -575,7 +574,8 @@ namespace fileFunctions
 		void        applyFunctionToLines   (std::size_t lowerBound, std::size_t upperBound, const std::function<std::string (const std::string &)> & function)
 		{
 			// Apply a function that takes a single string as an argument to a series of lines in the file
-			for (unsigned int i = std::min(lowerBound, upperBound); i <= std::max(lowerBound, upperBound) && i < fileContents.size(); ++i)
+			FWPF::validateBounds(lowerBound, upperBound);
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
 			{
 				fileContents.at(i) = function(fileContents.at(i));
 			}
@@ -584,7 +584,8 @@ namespace fileFunctions
 		void        applyFunctionToLines   (std::size_t lowerBound, std::size_t upperBound, const std::function<std::string (const std::string &, const T &)> & function, const T & parameter)
 		{
 			// Apply a function that takes a single string an another parameter as arguments to a series of lines in the file
-			for (unsigned int i = std::mind(lowerBound, upperBound); i <= std::max(lowerBound, upperBound) && i < fileContents.size(); ++i)
+			FWPF::validateBounds(lowerBound, upperBound);
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
 			{
 				fileContents.at(i) = function(fileContents.at(i), parameter);
 			}
@@ -593,7 +594,8 @@ namespace fileFunctions
 		void        applyFunctionToLines   (std::size_t lowerBound, std::size_t upperBound, const std::function<std::string (const std::string &, const T &, const U &)> & function, const T & parameterOne, const U & parameterTwo)
 		{
 			// Apply a function that takes a single string and two other parameters as arugments to a series of lines in the file
-			for (unsigned int i = std::min(lowerBound, upperBound); i <= std::max(lowerBound, upperBound) && i < fileContents.size(); ++i)
+			FWPF::validateBounds(lowerBound, upperBound);
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
 			{
 				fileContents.at(i) = function(fileContents.at(i), parameterOne, parameterTwo);
 			}
@@ -602,7 +604,8 @@ namespace fileFunctions
 		void        applyFunctionToLines   (std::size_t lowerBound, std::size_t upperBound, const std::function<std::string (const std::string &, const T &, const U &, const V &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree)
 		{
 			// Apply a function that takes a single string and three other parameters as arguments to a series of lines in the file
-			for (unsigned int i = std::min(lowerBound, upperBound); i <= std::max(lowerBound, upperBound) && i < fileContents.size(); ++i)
+			FWPF::validateBounds(lowerBound, upperBound);
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
 			{
 				fileContents.at(i) = function(fileContents.at(i), parameterOne, parameterTwo, parameterThree);
 			}
@@ -611,7 +614,8 @@ namespace fileFunctions
 		void        applyFunctionToLines   (std::size_t lowerBound, std::size_t upperBound, const std::function<std::string (const std::string &, const T &, const U &, const V &, const W &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree, const W & parameterFour)
 		{
 			// Apply a function that takes a single string and four other parameters as arguments to a series of lines in the file
-			for (unsigned int i = std::min(lowerBound, upperBound); i <= std::max(lowerBound, upperBound) && i < fileContents.size(); ++i)
+			FWPF::validateBounds(lowerBound, upperBound);
+			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
 			{
 				fileContents.at(i) = function(fileContents.at(i), parameterOne, parameterTwo, parameterThree, parameterFour);
 			}
