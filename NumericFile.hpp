@@ -241,18 +241,22 @@ namespace fileFunctions
 		// Utilities
 		bool        empty                        () const
 		{
+			// Returns true if the file is empty, otherwise returns false
 			return contents.empty();
 		}
 		std::size_t size                         () const
 		{
+			// Returns the number of lines in the file as an unsigned integer
 			return contents.size();
 		}
 		std::size_t lineSize                     (std::size_t index) const
 		{
+			// Returns the size of a line in the file if it exists, otherwise returns 0
 			return (index < size() ? contents.at(index).size() : 0);
 		}
 		void        loadFromFile                 ()
 		{
+			// Clears the contents of the file, then loads the contents of the file 'fileName'
 			std::fstream file(fileName, std::ios::in);
 			clearContents();
 			contents.push_back(NumericLine());
@@ -269,9 +273,10 @@ namespace fileFunctions
 				}
 			}
 		}
-		void        loadFromFile                 (const std::string & str)
+		void        loadFromFile                 (const std::string & filePath)
 		{
-			std::fstream file(str, std::ios::in);
+			// Clears the contents of the file, then loads the contents of the file 'filePath'
+			std::fstream file(filePath, std::ios::in);
 			clearContents();
 			contents.push_back(NumericLine());
 			if (file.is_open())
@@ -289,6 +294,7 @@ namespace fileFunctions
 		}
 		void        loadFromFileAndAppend        ()
 		{
+			// Loads the contents of the file 'fileName' and appends them to the current contents
 			std::fstream file(fileName, std::ios::in);
 			contents.push_back(NumericLine());
 			if (file.is_open())
@@ -306,6 +312,7 @@ namespace fileFunctions
 		}
 		void        loadFromFileAndAppend        (const std::string & filePath)
 		{
+			// Loads the contents of the file 'filePath' and appends them to the current contents
 			std::fstream file(filePath, std::ios::in);
 			contents.push_back(NumericLine());
 			if (file.is_open())
@@ -323,6 +330,7 @@ namespace fileFunctions
 		}
 		void        outputToStream               (std::ostream & ostr) const
 		{
+			// Outputs the contents of the file to a std::ostream
 			for (NumericLine i : contents)
 			{
 				for (double j : i)
@@ -337,6 +345,7 @@ namespace fileFunctions
 		}
 		void        outputToFile                 () const
 		{
+			// Outputs the contents of the file to the file 'fileName'
 			std::fstream file(fileName, std::ios::out);
 			for (NumericLine i : contents)
 			{
@@ -355,6 +364,7 @@ namespace fileFunctions
 		}
 		void        outputToFile                 (const std::string & filePath) const
 		{
+			// Outputs the contents of the file to the file 'filePath'
 			std::fstream file(filePath, std::ios::out);
 			for (NumericLine i : contents)
 			{
@@ -373,6 +383,7 @@ namespace fileFunctions
 		}
 		void        appendToFile                 () const
 		{
+			// Appends the contents of the file to the file 'fileName'
 			std::fstream file(fileName, std::ios::out | std::ios::app);
 			for (NumericLine i : contents)
 			{
@@ -391,6 +402,7 @@ namespace fileFunctions
 		}
 		void        appendToFile                 (const std::string & filePath) const
 		{
+			// Appends the contents of the file to the file 'filePath'
 			std::fstream file(filePath, std::ios::out | std::ios::app);
 			for (NumericLine i : contents)
 			{
@@ -409,6 +421,7 @@ namespace fileFunctions
 		}
 		void        applyFunctionToEntry         (std::size_t line, std::size_t index, const std::function<double (double)> & function)
 		{
+			// Applies a function that takes a double and returns a double to an entry in the file
 			if (line < size() && index < lineSize(line))
 			{
 				contents.at(line).at(index) = function(contents.at(line).at(index));
@@ -416,6 +429,7 @@ namespace fileFunctions
 		}
 		void        applyFunctionToEntries       (std::size_t line, std::size_t lowerBound, std::size_t upperBound, const std::function<double (double)> & function)
 		{
+			// Applies a function that takes a double and returns a double to a set of entries in a line in the file
 			if (line < size())
 			{
 				FWPF::validateBounds(lowerBound, upperBound);
@@ -427,6 +441,7 @@ namespace fileFunctions
 		}
 		void        applyFunctionToEntryInLines  (std::size_t entry, std::size_t lowerBound, std::size_t upperBound, const std::function<double (double)> & function)
 		{
+			// Applies a function that takes a double and returns a double to an entry in a set of lines
 			FWPF::validateBounds(lowerBound, upperBound);
 			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
 			{
@@ -438,11 +453,12 @@ namespace fileFunctions
 		}
 		void        applyFunctionToEntriesInLines(std::size_t lowerEntry, std::size_t upperEntry, std::size_t lowerBound, std::size_t upperBound, const std::function<double (double)> & function)
 		{
+			// Applies a function that takes a double and returns a double to a set of entries in a set of lines
 			FWPF::validateBounds(lowerEntry, upperEntry);
 			FWPF::validateBounds(lowerBound, upperBound);
 			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
 			{
-				for (unsigned int j = lowerEntry; j < upperEntry && j < lineSize(i); ++j)
+				for (unsigned int j = lowerEntry; j <= upperEntry && j < lineSize(i); ++j)
 				{
 					contents.at(i).at(j) = function(contents.at(i).at(j));
 				}
@@ -450,6 +466,7 @@ namespace fileFunctions
 		}
 		void        applyFunctionToLine          (std::size_t line, const std::function<double (double)> & function)
 		{
+			// Applies a function that takes a double and returns a double to each entry in a line in the file
 			if (line < size())
 			{
 				for (double & i : contents.at(line))
@@ -460,6 +477,7 @@ namespace fileFunctions
 		}
 		void        applyFunctionToLines         (std::size_t lowerBound, std::size_t upperBound, const std::function<double (double)> & function)
 		{
+			// Applies a function that takes a double and returns a double to each entry in a set of lines in the file
 			FWPF::validateBounds(lowerBound, upperBound);
 			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
 			{
@@ -471,6 +489,7 @@ namespace fileFunctions
 		}
 		void        applyFunctionToContents      (const std::function<double (double)> & function)
 		{
+			// Applies a function that takes a double and returns a double to every entry in the file
 			for (NumericLine & i : contents)
 			{
 				for (double & j : i)
@@ -481,6 +500,7 @@ namespace fileFunctions
 		}
 		void        sortLine                     (std::size_t line, const std::function<bool (double, double)> & predicate = std::less<double>())
 		{
+			// Sorts a line in the file
 			if (line < size())
 			{
 				std::sort(contents.at(line).begin(), contents.at(line).end(), predicate);
@@ -488,6 +508,7 @@ namespace fileFunctions
 		}
 		void        sortLines                    (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (double, double)> & predicate = std::less<double>())
 		{
+			// Sorts a set of lines in the file, sorting each line individually and independently from the other lines
 			FWPF::validateBounds(lowerBound, upperBound);
 			for (unsigned int i = lowerBound; i < size() && i <= upperBound; ++i)
 			{
@@ -496,6 +517,7 @@ namespace fileFunctions
 		}
 		void        sortContents                 (const std::function<bool (double, double)> & predicate = std::less<double>())
 		{
+			// Sorts every line in the file, sorting each line individually and independently from the other lines
 			for (NumericLine & i : contents)
 			{
 				std::sort(i.begin(), i.end(), predicate);
@@ -504,18 +526,22 @@ namespace fileFunctions
 		// Computational Utilities
 		double computeValueFromLine                     (std::size_t line, const std::function<double (const std::deque<double> &)> & function)
 		{
+			// Computes a value from a line in the file using a function that takes a deque of doubles and returns a double
 			return line < size() ? function(contents.at(line)) : 0;
 		}
 		double computeValueFromLineUsingIteratorFunction(std::size_t line, const std::function<double (NumericLineIterator, NumericLineIterator)> & function)
 		{
+			// Computes a value from a line in the file using a function that takes two iterators and returns a double
 			return line < size() ? function(contents.at(line).begin(), contents.at(line).end()) : 0;
 		}
 		double computeSumOfLine                         (std::size_t line) const
 		{
+			// Computes the sum of the contents of a line in the file
 			return line < size() ? std::accumulate(contents.at(line).begin(), contents.at(line).end(), 0.0) : 0;
 		}
 		double computeSumOfLines                        (std::size_t lowerBound, std::size_t upperBound) const
 		{
+			// Computes the sum of a set of lines in the file
 			FWPF::validateBounds(lowerBound, upperBound);
 			double sum = 0;
 			for (unsigned int i = lowerBound; i <= upperBound && i < size(); ++i)
@@ -526,6 +552,7 @@ namespace fileFunctions
 		}
 		double computeSumOfContents                     () const
 		{
+			// Computes the sum of the contents of the file
 			double sum = 0;
 			for (NumericLine i : contents)
 			{
@@ -535,10 +562,12 @@ namespace fileFunctions
 		}
 		double computeAverageOfLine                     (std::size_t line) const
 		{
+			// Computes the average of a line in the file
 			return lineSize(line) ? std::accumulate(contents.at(line).begin(), contents.at(line).end(), 0.0) / lineSize(line) : 0;
 		}
 		double computeAverageOfLines                    (std::size_t lowerBound, std::size_t upperBound) const
 		{
+			// Computes the average of a set of lines in the file
 			FWPF::validateBounds(lowerBound, upperBound);
 			double sum = 0;
 			std::size_t numElems = 0;
@@ -551,6 +580,7 @@ namespace fileFunctions
 		}
 		double computeAverageOfContents                 () const
 		{
+			// Computes the average of all the data in the file
 			double sum = 0;
 			std::size_t numElems = 0;
 			for (unsigned int i = 0; i < size(); ++i)
@@ -562,6 +592,7 @@ namespace fileFunctions
 		}
 		double computeVarianceOfLine                    (std::size_t line) const
 		{
+			// Computes the variance of a line in the file
 			if (line < size())
 			{
 				if (lineSize(line))
@@ -580,6 +611,7 @@ namespace fileFunctions
 		}
 		double computeVarianceOfLines                   (std::size_t lowerBound, std::size_t upperBound) const
 		{
+			// Computes the variance of a set of lines in the file
 			FWPF::validateBounds(lowerBound, upperBound);
 			double mean = computeAverageOfLines(lowerBound, upperBound);
 			double sumOfSquares = 0;
@@ -589,50 +621,81 @@ namespace fileFunctions
 				for (unsigned int j = 0; j < lineSize(i); ++j)
 				{
 					sumOfSquares += (contents.at(i).at(j) - mean) * (contents.at(i).at(j) - mean);
-					++numElems;
 				}
+				numElems += lineSize(i);
+			}
+			return numElems ? sumOfSquares / numElems : 0;
+		}
+		double computeVarianceOfContents                () const
+		{
+			// Computes the variance of the data in the file
+			double mean = computeAverageOfContents();
+			double sumOfSquares = 0;
+			std::size_t numElems = 0;
+			for (unsigned int i = 0; i < size(); ++i)
+			{
+				for (unsigned int j = 0; j < lineSize(i); ++j)
+				{
+					sumOfSquares += (contents.at(i).at(j) - mean) * (contents.at(i).at(j) - mean);
+				}
+				numElems += lineSize(i);
 			}
 			return numElems ? sumOfSquares / numElems : 0;
 		}
 		double computeStandardDeviationOfLine           (std::size_t line) const
 		{
+			// Computes the standard deviation of a line in the file
 			return std::sqrt(computeVarianceOfLine(line));
 		}
 		double computeStandardDeviationOfLines          (std::size_t lowerBound, std::size_t upperBound) const
 		{
+			// Computes the standard deviation of a set of lines in the file
 			return std::sqrt(computeVarianceOfLines(lowerBound, upperBound));
+		}
+		double computeStandardDeviationOfContents       () const
+		{
+			// Computes the standard deviation of the data in the file
+			return std::sqrt(computeVarianceOfContents());
 		}
 		// Iterators
 		NumericFileIterator             begin  ()
 		{
+			// Returns an iterator to the beginning of the file
 			return contents.begin();
 		}
 		NumericFileIterator             end    ()
 		{
+			// Returns an iterator to the end of the file
 			return contents.end();
 		}
 		ConstNumericFileIterator        cbegin () const
 		{
+			// Returns a const iterator to the beginning of the file
 			return contents.cbegin();
 		}
 		ConstNumericFileIterator        cend   () const
 		{
+			// Returns a const iterator to the end of the file
 			return contents.cend();
 		}
 		ReverseNumericFileIterator      rbegin ()
 		{
+			// Returns a reverse iterator to the (reverse) beginning of the file
 			return contents.rbegin();
 		}
 		ReverseNumericFileIterator      rend   ()
 		{
+			// Returns a reverse iterator to the (reverse) end of the file
 			return contents.rend();
 		}
 		ConstReverseNumericFileIterator crbegin() const
 		{
+			// Returns a const reverse iterator to the (reverse) beginning of the file
 			return contents.crbegin();
 		}
 		ConstReverseNumericFileIterator crend  () const
 		{
+			// Returns a const reverse iterator to the (reverse) end of the file
 			return contents.crend();
 		}
 		// Overloaded Operators
