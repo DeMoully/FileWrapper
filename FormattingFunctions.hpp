@@ -114,6 +114,11 @@ namespace fileFunctions
 		return result;
 	}
 
+	std::string reverse(const std::string & str)
+	{
+		return std::string(str.crbegin(), str.crend());
+	}
+
 	bool startsWithCharacter(const std::string & str, char ch)
 	{
 		return str.size() > 0 && str.at(0) == ch;
