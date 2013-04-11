@@ -218,6 +218,24 @@ namespace fileFunctions
 				fileContents.erase(fileContents.begin() + index);
 			}
 		}
+		template <class T, class U, class V>
+		void removeLineIf    (std::size_t index, const std::function<bool (const std::string &, const T &, const U &, const V &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree)
+		{
+			// Removes a line if function(line, parameterOne, parameterTwo, parameterThree) == true
+			if (index < size() && function(fileContents.at(index), parameterOne, parameterTwo, parameterThree))
+			{
+				fileContents.erase(fileContents.begin() + index);
+			}
+		}
+		template <class T, class U, class V, class W>
+		void removeLineIf    (std::size_t index, const std::function<bool (const std::string &, const T &, const U &, const V &, const W &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree, const W & parameterFour)
+		{
+			// Removes a line if function(line, parameterOne, parameterTwo, parameterThree, parameterFour) == true
+			if (index < size() && function(fileContents.at(index), parameterOne, parameterTwo, parameterThree, parameterFour))
+			{
+				fileContents.erase(fileContents.begin() + index);
+			}
+		}
 		void removeLines     (std::size_t lowerBound, std::size_t upperBound)
 		{
 			// Removes the lines in [lowerBound, upperBound]
@@ -278,6 +296,48 @@ namespace fileFunctions
 				while (lowerBound <= upperBound && lowerBound < size())
 				{
 					if (function(fileContents.at(lowerBound), parameterOne, parameterTwo))
+					{
+						fileContents.erase(fileContents.begin() + lowerBound);
+						--upperBound;
+					}
+					else
+					{
+						++lowerBound;
+					}
+				}
+			}
+		}
+		template <class T, class U, class V>
+		void removeLinesIf   (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (const std::string &, const T &, const U &, const V &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree)
+		{
+			// Goes through each line in [lowerBound, upperBound] and erases it if function(line, parameterOne, parameterTwo, parameterThree) == true
+			FWPF::validateBounds(lowerBound, upperBound);
+			if (lowerBound < size())
+			{
+				while (lowerBound <= upperBound && lowerBound < size())
+				{
+					if (function(fileContents.at(lowerBound), parameterOne, parameterTwo, parameterThree))
+					{
+						fileContents.erase(fileContents.begin() + lowerBound);
+						--upperBound;
+					}
+					else
+					{
+						++lowerBound;
+					}
+				}
+			}
+		}
+		template <class T, class U, class V, class W>
+		void removeLinesIf   (std::size_t lowerBound, std::size_t upperBound, const std::function<bool (const std::string &, const T &, const U &, const V &, const W &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree, const W & parameterFour)
+		{
+			// Goes through each line in [lowerBound, upperBound] and erases it if function(line, parameterOne, parameterTwo, parameterThree, parameterFour) == true
+			FWPF::validateBounds(lowerBound, upperBound);
+			if (lowerBound < size())
+			{
+				while (lowerBound <= upperBound && lowerBound < size())
+				{
+					if (function(fileContents.at(lowerBound), parameterOne, parameterTwo, parameterThree, parameterFour))
 					{
 						fileContents.erase(fileContents.begin() + lowerBound);
 						--upperBound;
@@ -353,7 +413,7 @@ namespace fileFunctions
 		template <class T, class U, class V>
 		void clearContentsIf (const std::function<bool (const std::string &, const T &, const U &, const V &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree)
 		{
-			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo) == true
+			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo, parameterThree) == true
 			std::size_t begin = 0;
 			std::size_t end = size();
 			while (begin != end)
@@ -372,7 +432,7 @@ namespace fileFunctions
 		template <class T, class U, class V, class W>
 		void clearContentsIf (const std::function<bool (const std::string &, const T &, const U &, const V &, const W &)> & function, const T & parameterOne, const U & parameterTwo, const V & parameterThree, const W & parameterFour)
 		{
-			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo) == true
+			// Goes through each line in the file and erases it if function(line, parameterOne, parameterTwo, parameterThree, parameterFour) == true
 			std::size_t begin = 0;
 			std::size_t end = size();
 			while (begin != end)
@@ -460,6 +520,38 @@ namespace fileFunctions
 				while (std::getline(file, buffer))
 				{
 					fileContents.push_back(buffer);
+				}
+			}
+		}
+		void		loadFromFileAndPrepend ()
+		{
+			// Loads the data from the file specified by 'fileName', then
+			// prepends it to the data currently held by the FileWrapper
+			// object
+			std::fstream file(fileName, std::ios::in);
+			if (file.is_open())
+			{
+				int position = 0;
+				std::string buffer;
+				while (std::getline(file, buffer))
+				{
+					fileContents.insert(fileContents.begin() + position++, buffer);
+				}
+			}
+		}
+		void		loadFromFileAndPrepend (const std::string & filePath)
+		{
+			// Loads the data from the file specified by 'filePath', then
+			// prepends it to the data currently held by the FileWrapper
+			// object
+			std::fstream file(filePath, std::ios::in);
+			if (file.is_open())
+			{
+				int position = 0;
+				std::string buffer;
+				while (std::getline(file, buffer))
+				{
+					fileContents.insert(fileContents.begin() + position++, buffer);
 				}
 			}
 		}
@@ -667,34 +759,42 @@ namespace fileFunctions
 		// Iterators
 		FileIterator             begin  ()
 		{
+			// Return an iterator to the beginning of the file
 			return fileContents.begin();
 		}
 		FileIterator             end    ()
 		{
+			// Return an iterator to the end of the file
 			return fileContents.end();
 		}
 		ConstFileIterator        cbegin () const
 		{
+			// Return a const iterator to the beginning of the file
 			return fileContents.cbegin();
 		}
 		ConstFileIterator        cend   () const
 		{
+			// Return a const iterator to the end of the file
 			return fileContents.cend();
 		}
 		ReverseFileIterator      rbegin ()
 		{
+			// Return a reverse iterator to the (reverse) beginning of the file
 			return fileContents.rbegin();
 		}
 		ReverseFileIterator      rend   ()
 		{
+			// Return a reverse iterator to the (reverse) end of the file
 			return fileContents.rend();
 		}
 		ConstReverseFileIterator crbegin() const
 		{
+			// Return a const reverse iterator to the (reverse) beginning of the file
 			return fileContents.crbegin();
 		}
 		ConstReverseFileIterator crend  () const
 		{
+			// Return a const reverse iterator to the (reverse) end of the file
 			return fileContents.crend();
 		}
 		// Overloaded Operators
