@@ -2,6 +2,8 @@
 
 #include <ostream>
 
+#include "FormattingFunctions.hpp"
+
 namespace fileFunctions
 {
 	enum class FileCloseAction
@@ -32,5 +34,29 @@ namespace fileFunctions
 			}
 		}
 		return ostr;
+	}
+
+	std::istream & operator >> (std::istream & istr, FileCloseAction & rhs)
+	{
+		std::string input;
+		istr >> input;
+		input = convertToLowerCase(input);
+		if (input == "none" || input == "0")
+		{
+			rhs = FileCloseAction::NONE;
+		}
+		else if (input == "output" || input == "1")
+		{
+			rhs = FileCloseAction::OUTPUT;
+		}
+		else if (input == "append" || input == "2")
+		{
+			rhs = FileCloseAction::APPEND;
+		}
+		else
+		{
+			rhs = FileCloseAction::NONE;
+		}
+		return istr;
 	}
 }
