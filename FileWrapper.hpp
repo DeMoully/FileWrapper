@@ -756,6 +756,151 @@ namespace fileFunctions
 				i = function(i, parameterOne, parameterTwo, parameterThree, parameterFour);
 			}
 		}
+		void        mergeAndAppend (const FileWrapper & rhs)
+		{
+			// Adds the contents of rhs to the end of the FileWrapper object
+			for (unsigned int i = 0; i < rhs.size(); ++i)
+			{
+				appendLine(rhs.getLine(i));
+			}
+		}
+		void        mergeAndAppend (FileIterator begin, FileIterator end)
+		{
+			// Adds the contents of [begin, end) to the end of the FileWrapper object
+			while (begin != end)
+			{
+				appendLine(*begin++);
+			}
+		}
+		void        mergeAndAppend (ConstFileIterator begin, ConstFileIterator end)
+		{
+			// Adds the contents of [begin, end) to the end of the FileWrapper object
+			while (begin != end)
+			{
+				appendLine(*begin++);
+			}
+		}
+		void        mergeAndAppend (ReverseFileIterator begin, ReverseFileIterator end)
+		{
+			// Adds the contents of [begin, end) to the end of the FileWrapper object
+			while (begin != end)
+			{
+				appendLine(*begin++);
+			}
+		}
+		void        mergeAndAppend (ConstReverseFileIterator begin, ConstReverseFileIterator end)
+		{
+			// Adds the contents of [begin, end) to the end of the FileWrapper object
+			while (begin != end)
+			{
+				appendLine(*begin++);
+			}
+		}
+		void        mergeAndPrepend(const FileWrapper & rhs)
+		{
+			// Prepends the contents of rhs to the FileWrapper object
+			std::size_t position = 0;
+			for (unsigned int i = 0; i < rhs.size(); ++i)
+			{
+				insertLine(position++, rhs.getLine(i));
+			}
+		}
+		void        mergeAndPrepend(FileIterator begin, FileIterator end)
+		{
+			// Prepends the contents of [begin, end) to the FileWrapper object
+			std::size_t position = 0;
+			while (begin != end)
+			{
+				insertLine(position++, *begin++);
+			}
+		}
+		void        mergeAndPrepend(ConstFileIterator begin, ConstFileIterator end)
+		{
+			// Prepends the contents of [begin, end) to the FileWrapper object
+			std::size_t position = 0;
+			while (begin != end)
+			{
+				insertLine(position++, *begin++);
+			}
+		}
+		void        mergeAndPrepend(ReverseFileIterator begin, ReverseFileIterator end)
+		{
+			// Prepends the contents of [begin, end) to the FileWrapper object
+			std::size_t position = 0;
+			while (begin != end)
+			{
+				insertLine(position++, *begin++);
+			}
+		}
+		void        mergeAndPrepend(ConstReverseFileIterator begin, ConstReverseFileIterator end)
+		{
+			// Prepends the contents of [begin, end) to the FileWrapper object
+			std::size_t position = 0;
+			while (begin != end)
+			{
+				insertLine(position++, *begin++);
+			}
+		}
+		void        mergeAndInsert (std::size_t index, const FileWrapper & rhs)
+		{
+			// Merge the contents of rhs with those of the FileWrapper object, starting at index
+			// Each line is inserted before index, so the valid range is [0, size() -1]
+			if (index < size())
+			{
+				for (unsigned int i = 0; i < rhs.size(); ++i)
+				{
+					insertLine(index++, rhs.getLine(i));
+				}
+			}
+		}
+		void        mergeAndInsert (std::size_t index, FileIterator begin, FileIterator end)
+		{
+			// Merge the contents of [begin, end) with those of the FileWrapper object, starting at index
+			// Each line is inserted before index, so the valid range is [0, size() - 1]
+			if (index < size())
+			{
+				while (begin != end)
+				{
+					insertLine(index++, *begin++);
+				}
+			}
+		}
+		void        mergeAndInsert (std::size_t index, ConstFileIterator begin, ConstFileIterator end)
+		{
+			// Merge the contents of [begin, end) with those of the FileWrapper object, starting at index
+			// Each line is inserted before index, so the valid range is [0, size() - 1]
+			if (index < size())
+			{
+				while (begin != end)
+				{
+					insertLine(index++, *begin++);
+				}
+			}
+		}
+		void        mergeAndInsert (std::size_t index, ReverseFileIterator begin, ReverseFileIterator end)
+		{
+			// Merge the contents of [begin, end) with those of the FileWrapper object, starting at index
+			// Each line is inserted before index, so the valid range is [0, size() - 1]
+			if (index < size())
+			{
+				while (begin != end)
+				{
+					insertLine(index++, *begin++);
+				}
+			}
+		}
+		void        mergeAndInsert (std::size_t index, ConstReverseFileIterator begin, ConstReverseFileIterator end)
+		{
+			// Merge the contents of [begin, end) with those of the FileWrapper object, starting at index
+			// Each line is inserted before index, so the valid range is [0, size() - 1]
+			if (index < size())
+			{
+				while (begin != end)
+				{
+					insertLine(index++, *begin++);
+				}
+			}
+		}
 		// Iterators
 		FileIterator             begin  ()
 		{
