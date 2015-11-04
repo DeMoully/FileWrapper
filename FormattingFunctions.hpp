@@ -3,8 +3,10 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <numeric>
+#include <list>
 
-namespace fileFunctions
+namespace sp
 {
 	std::string convertToLowerCase(const std::string & str)
 	{
@@ -58,7 +60,7 @@ namespace fileFunctions
 		{
 			if (!isspace(str.at(i)))
 			{
-				return std::string(str.cbegin() + i, str.cbegin() + str.size());
+				return std::string(str.cbegin() + i, str.cend());
 			}
 		}
 		return "";
@@ -119,6 +121,11 @@ namespace fileFunctions
 		return std::string(str.crbegin(), str.crend());
 	}
 
+	std::string removeTrailingSpaces(const std::string & str)
+	{
+		return reverse(removeLeadingSpaces(reverse(str)));
+	}
+
 	bool startsWithCharacter(const std::string & str, char ch)
 	{
 		return str.size() > 0 && str.at(0) == ch;
@@ -139,5 +146,56 @@ namespace fileFunctions
 	bool lengthIs(const std::string & str, std::size_t length)
 	{
 		return str.size() == length;
+	}
+
+	template <class T>
+	std::string inflateList(const std::list<T> & list, const std::string & separator = ", ")
+	{
+		std::string result = std::accumulate(list.cbegin(), list.cend(), std::string(), [separator](const std::string & current, const T & val)
+		{
+			return current + std::to_string(val) + separator;
+		});
+		if (result.size())
+		{
+			return std::string(result.begin(), result.begin() + result.size() - separator.size()); // Trim off the final separator
+		}
+		return result;
+	}
+	std::string inflateList(const std::list<std::string> & list, const std::string & separator = ", ")
+	{
+		std::string result = std::accumulate(list.cbegin(), list.cend(), std::string(), [separator](const std::string & current, const std::string & val)
+		{
+			return current + val + separator;
+		});
+		if (result.size())
+		{
+			return std::string(result.begin(), result.begin() + result.size() - separator.size()); // Trim off the final separator
+		}
+		return result;
+	}
+
+	std::list<std::string> splitString(const std::string & str, char separator = ',')
+	{
+		std::list<std::string> result;
+		std::string::const_iterator iterator = str.cbegin();
+		std::string temp;
+		while (iterator != str.cend())
+		{
+			if (*iterator != separator)
+			{
+				temp += *iterator;
+			}
+			else
+			{
+				result.push_back(temp);
+				temp.clear();
+			}
+			++iterator;
+		}
+		if (temp.size())
+		{
+			result.push_back(temp);
+		}
+		return result;
 	}
 }
