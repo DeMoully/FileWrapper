@@ -4,7 +4,7 @@
 #include <string>
 #include <cstdio>
 
-namespace fileFunctions
+namespace sp
 {
 	namespace FWPF // FileWrapperPrivateFunctions
 	{
