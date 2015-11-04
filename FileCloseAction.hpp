@@ -4,7 +4,7 @@
 
 #include "FormattingFunctions.hpp"
 
-namespace fileFunctions
+namespace sp
 {
 	enum class FileCloseAction
 	{
@@ -17,17 +17,17 @@ namespace fileFunctions
 	{
 		switch (rhs)
 		{
-		case FileCloseAction::NONE:
+			case FileCloseAction::NONE:
 			{
 				ostr << "NONE";
 				break;
 			}
-		case FileCloseAction::OUTPUT:
+			case FileCloseAction::OUTPUT:
 			{
 				ostr << "OUTPUT";
 				break;
 			}
-		case FileCloseAction::APPEND:
+			case FileCloseAction::APPEND:
 			{
 				ostr << "APPEND";
 				break;
@@ -41,11 +41,7 @@ namespace fileFunctions
 		std::string input;
 		istr >> input;
 		input = convertToLowerCase(input);
-		if (input == "none" || input == "0")
-		{
-			rhs = FileCloseAction::NONE;
-		}
-		else if (input == "output" || input == "1")
+		if (input == "output" || input == "1")
 		{
 			rhs = FileCloseAction::OUTPUT;
 		}
@@ -53,7 +49,7 @@ namespace fileFunctions
 		{
 			rhs = FileCloseAction::APPEND;
 		}
-		else
+		else // Also handles the case where 0 or 'none' is the input
 		{
 			rhs = FileCloseAction::NONE;
 		}
